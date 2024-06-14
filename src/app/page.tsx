@@ -1,24 +1,31 @@
-// /pages/index.tsx
-
-import { TodoItem } from "@/components/TodoItem"
-import { prisma } from "@/db"
-import Link from "next/link"
-
+import { TodoItem } from "@/components/TodoItem";
+import { prisma } from "@/db";
+import { redirect } from "next/dist/server/api-utils";
+import Link from "next/link";
+import { Router, useRouter } from "next/router";
+import { useState, useEffect } from "react";
 
 function getTodos() {
-  return prisma.todo.findMany()
+  
+  return prisma.todo.findMany({ where: { hidden: false } })
 }
 
 async function toggleTodo(id: string, complete: boolean) {
   "use server"
-
-  await prisma.todo.update({ where: { id }, data: { complete } })
+  try {
+    await prisma.todo.update({ where: { id }, data: { complete } })
+  } catch (error) {
+    console.error("Gagal melakukan pembaruan data: ", error)
+  }
 }
 
-async function deleteTodo(id: string) {
+async function hideTodo(id: string) {
   "use server"
-
-  await prisma.todo.delete({ where: { id } })
+  try {
+    await prisma.todo.update({ where: { id }, data: { hidden: true } })
+  } catch (error) {
+    console.error("Gagal melakukan pembaruan data: ", error)
+  }
 }
 
 export default async function Home() {
@@ -44,7 +51,7 @@ export default async function Home() {
             description={todo.description}
             complete={todo.complete}
             toggleTodo={toggleTodo}
-            deleteTodo={deleteTodo}
+            deleteTodo={hideTodo} 
           />
         ))}
       </ul>

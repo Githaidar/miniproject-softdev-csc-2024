@@ -17,4 +17,5 @@ model Todo {
   complete Boolean 
   createat DateTime @default(now())
   updateat DateTime @updatedAt
+  hidden Boolean @default(false) 
 }
